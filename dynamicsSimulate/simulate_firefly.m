@@ -6,10 +6,11 @@ function simres_st = simulate_firefly()
     
     fprintf('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n');
     fprintf('[simulate_firefly] add modules .. \n');    
-    addpath('/home/tzo4/Dropbox/tomas/pennState/avia/software/dynamicsMath');
-    addpath('/home/tzo4/Dropbox/tomas/pennState/avia/software/dynamicsNED');
-    addpath('/home/tzo4/Dropbox/tomas/pennState/avia/software/dynamicsVehicle');    
-    addpath('/home/tzo4/Dropbox/tomas/pennState/avia/software/dynamicsPlot');
+    bpath = '/home/tzo4/Dropbox/tomas/pennState/avia/software/dynamics_RUAV';
+    addpath([bpath '/dynamicsMath']);
+    addpath([bpath '/dynamicsNED']);
+    addpath([bpath '/dynamicsVehicle']);
+    addpath([bpath '/dynamicsPlot']);
     
     fprintf('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n');
     fprintf('[simulate_firefly] Create structures .. \n');
@@ -64,8 +65,8 @@ function simres_st = simulate_firefly()
     
     fprintf('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n');
     fprintf('[simulate_firefly] Plotting sim_st .. \n');
-    % plot_input(sim_st);
-    % plot_state(sim_st);   
+    plot_input(sim_st);
+    plot_state(sim_st);   
     plot_output(sim_st);
 
     close all;

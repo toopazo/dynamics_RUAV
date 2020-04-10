@@ -36,7 +36,7 @@ function [fig1, fig2, fig3, fig4] = plot_output_yPID(sim_st)
     % title('Angular velocity of rotors (relative to the body)');
     xlabel('Time s');
     ylabel('NED velocity m/s');
-    cellarr = {'cmd north', 'cmd east' 'cmd down', 'north', 'east' 'down'};
+    cellarr = {'north', 'east' 'down', 'cmd north', 'cmd east' 'cmd down'};
     legend(cellarr, 'Location', 'eastoutside');  % best
     
     set(fig1, 'Position', get(0, 'Screensize'));
@@ -62,7 +62,7 @@ function [fig1, fig2, fig3, fig4] = plot_output_yPID(sim_st)
     % title('Angular velocity of rotors (relative to the body)');
     xlabel('Time s');
     ylabel('RPY Euler angles deg');
-    cellarr = {'cmd roll', 'cmd pitch' 'cmd yaw', 'roll', 'pitch' 'yaw'};
+    cellarr = {'roll', 'pitch' 'yaw', 'cmd roll', 'cmd pitch' 'cmd yaw'};
     legend(cellarr, 'Location', 'eastoutside');  % best
     
     set(fig2, 'Position', get(0, 'Screensize'));
@@ -88,7 +88,7 @@ function [fig1, fig2, fig3, fig4] = plot_output_yPID(sim_st)
     % title('Angular velocity of rotors (relative to the body)');
     xlabel('Time s');
     ylabel('PQR Ang. velocity deg/s');
-    cellarr = {'cmd P', 'cmd Q' 'cmd R', 'P', 'Q' 'R'};
+    cellarr = {'P', 'Q' 'R', 'cmd P', 'cmd Q' 'cmd R'};
     legend(cellarr, 'Location', 'eastoutside');  % best
     
     set(fig3, 'Position', get(0, 'Screensize'));
@@ -129,7 +129,7 @@ function [fig1, fig2, fig3, fig4] = plot_output_yPID(sim_st)
     % title('Angular velocity of rotors (relative to the body)');
     xlabel('Time s');
     ylabel('delta (throttle)');
-    cellarr = {'m1', 'm2', 'm3', 'm4', 'm5', 'm6', 'm7', 'm8'};
+    cellarr = {'m1', 'm6', 'm2', 'm5', 'm3', 'm8', 'm4', 'm7'};
     legend(cellarr, 'Location', 'eastoutside');  % best
     
     set(fig4, 'Position', get(0, 'Screensize'));

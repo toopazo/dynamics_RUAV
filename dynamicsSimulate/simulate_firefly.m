@@ -1,8 +1,9 @@
 function simres_st = simulate_firefly()
 
-    clear all   % Reset persistent variables
+    clear all       % Reset persistent variables
     close all
     clc
+    format compact
     
     fprintf('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n');
     fprintf('[simulate_firefly] add modules .. \n');    
@@ -15,19 +16,21 @@ function simres_st = simulate_firefly()
     fprintf('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n');
     fprintf('[simulate_firefly] Create structures .. \n');
     sim_st.medium_st = medium_earth();
-    sim_st.vehicle_st = firefly_vehicle_st();    
+    sim_st.vehicle_st = firefly_vehicle_st();
     
+    % sim_st.fdyn_x0      = sim_st.vehicle_st.x0;
     % Open loop input function => u = g(t)
-    % sim_st.fdyn_input = @fdyn_input;    
+    % sim_st.fdyn_input = @vehicle_input;    
     % Open loop dynamics => xdot = f( t, x, u = g(t) )
-    % sim_st.fdyn_xdot = @fdyn_xdot;  
+    % sim_st.fdyn_xdot  = @vehicle_xdot;  
 
+    sim_st.fdyn_x0      = [sim_st.vehicle_st.x0; sim_st.vehicle_st.omega0];
     % Closed loop input function => xcmd = g(t)
-    sim_st.fdyn_input = @fdyn_cl_input;      
-    % Closed loop dynamics => xdot = f( t, x, u)  
-    %   where     u = actuator( x, delta )
-    %         delta = controller( x, xcmd )
-    sim_st.fdyn_xdot = @fdyn_cl_xdot;  
+    sim_st.fdyn_input   = @clsys_input;      
+    % Closed loop dynamics => xdot = f( t, x, u)  , where
+    % u     = actuator( x, delta )
+    % delta = controller( x, xcmd )
+    sim_st.fdyn_xdot    = @clsys_xdot;  
 
     sim_st.tinitial = 0;
     sim_st.tfinal   = 30;
@@ -40,7 +43,7 @@ function simres_st = simulate_firefly()
 %    plot_vehicle_st(sim_st.vehicle_st, sim_st.fpath);
 %    firefly_rotor_TQP_test();
 %    math_compute_Vrel_test(sim_st.vehicle_st);
-%    math_ForMom_aero_plot(sim_st.vehicle_st, sim_st.medium_st);        
+%    math_ForMom_aero_plot(sim_st.vehicle_st, sim_st.medium_st);     
     
     fprintf('%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%\n');
     fprintf('[simulate_firefly] Calling simulate_ode .. \n');
@@ -58,7 +61,7 @@ function simres_st = simulate_firefly()
     input_st = postprocess_input(sim_st.u_arr);
     sim_st.input_st = input_st;    
     
-    output_st = sim_st.y_arr; % postprocess_output(sim_st.y_arr);
+    output_st = postprocess_output(sim_st.y_arr);
     sim_st.output_st = output_st;
     
     % return

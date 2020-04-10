@@ -1,4 +1,4 @@
-function [u] = fdyn_cl_input(t, vehicle_st, medium_st)
+function [u] = clsys_input(t, vehicle_st, medium_st)
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Input vector
@@ -7,7 +7,7 @@ function [u] = fdyn_cl_input(t, vehicle_st, medium_st)
     rads2rpm = 60 / (2*pi);        
     
     % Linear Velocity of the CM (frd origin) wrt ned, expressed in ned coord
-    vcmd_ned    = [1; 3; 0];            % 3 x 1
+    vcmd_ned    = [3; 0; 0];            % 3 x 1
     yawcmd      = deg2rad(0);           % 1 x 1
     
     

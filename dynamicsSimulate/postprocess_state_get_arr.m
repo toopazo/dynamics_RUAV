@@ -19,7 +19,7 @@ function arr = postprocess_state_get_arr(x_arr, name)
             arr = x_arr(4:7, :);
         case 'vel'
             arr = x_arr(8:10, :);
-        case 'angvel'
+        case 'pqr'
             arr = x_arr(11:13, :);
         case 'rpy'
             arr = x_arr(4:7, :);
@@ -28,13 +28,10 @@ function arr = postprocess_state_get_arr(x_arr, name)
                 RPY_arr(:, i) = math_quat2angles(arr(:, i));
             end
             arr = RPY_arr;
-%        case 'wrel'
-%            % arr = x_arr(14:37, :);
-%            if nstates >= 21
-%                arr = x_arr(14:21, :);
-%            else
-%                arr = zeros(8, nsamples);
-%            end
+        case 'omega'
+            if nstates >= 21
+                arr = x_arr(14:21, :);
+            end
         otherwise
             arr = [];
             fprintf('Unrecognized name %s \n', name)

@@ -13,13 +13,13 @@ function firefly_rotor_TQP_test()
     for roti = 1:nrotors
         % omega = delta(i);  
         % Vrel = Vrel_ricm(:, i);
-        signi = firefly_rotors_spin_direction(roti);
+        signi = firefly_rotor_spin_direction(roti);
         
         [...
             T  , ... % rotor thrust  
             Q  , ... % rotor torque (due to drag)
             P    ... % rotor power
-        ] = firefly_rotor_TQP(...
+        ] = firefly_rotor_TQP_model(...
             omega   , ... % AngVel of frdi wrt frd, expressed in frdi coord
             Vrel      ... % Relative [Va, aoa, ssa] of the rotor wrt the wind
         );
@@ -83,7 +83,7 @@ function firefly_rotor_TQP_test()
     n = 2;
     p = polyfit(x,y,n)      
 
-    [T, Q, P] = firefly_rotor_TQP(omega_arr, NaN);
+    [T, Q, P] = firefly_rotor_TQP_model(omega_arr, NaN);
     quadratic_Trotor_arr = T;
     quadratic_Qrotor_arr = Q;
     quadratic_Protor_arr = P;

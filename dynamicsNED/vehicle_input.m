@@ -1,4 +1,4 @@
-function [u] = fdyn_input(t, vehicle_st, medium_st)
+function [u] = vehicle_input(t, vehicle_st, medium_st)
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Input vector
@@ -20,9 +20,6 @@ function [u] = fdyn_input(t, vehicle_st, medium_st)
     w_frd_frd_ned = [0; 0; 0];          % 3 x 1
     % Initial condition
     x = [r_ned_CM_ned; q_frd_ned; v_ned_CM_ned; w_frd_frd_ned];      
-
-    % state derivative
-    xdot = x*0;      % Here we are assuming no ForMom dependance on xdot
     
     % omega = 2500 * rpm2rads * ones(vehicle_st.geometry.nrotors, 1);
     omega = 437.9183 * ones(vehicle_st.geometry.nrotors, 1);    % hover omega
@@ -34,7 +31,6 @@ function [u] = fdyn_input(t, vehicle_st, medium_st)
         yForMom           ...   % additional output
     ] = firefly_ForMom_net(...
         x           , ...   % vehicle state
-        xdot        , ...   % vehicle state derivative
         delta       , ...   % actuator input
         vehicle_st  , ...   % vehicle parameters
         medium_st     ...   % medium parameters

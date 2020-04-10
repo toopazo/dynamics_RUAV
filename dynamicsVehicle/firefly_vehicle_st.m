@@ -121,9 +121,6 @@ function st = firefly_vehicle_st()
     r_frd_CM_CM = [0; 0; 0];
     r_frd_bcm_cg = [0; 0; 0];
     r_frd_CG_CM = -r_frd_bcm_cg;
-
-    % cm2m = 1.0 / 100;
-    % g2kg = 1.0 / 1000;
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Inertia properties
@@ -160,17 +157,16 @@ function st = firefly_vehicle_st()
     st.aero.coeff.CyawM         = @firefly_coeff_CyawM;
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Geometry properties
+    % Geometry properties of vehicle and rotors
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
         
     st.geometry.nrotors = 8;    
-    
+        
+    % Create array of rotor location
     % distance of rot1 wrt Center of Geometry
     rx = 0.33;
     ry = 0.60;
     rz = 0.12;
-    
-    % Create array of locations for all rotors
     r_frd_roti_cg = zeros(3, st.geometry.nrotors);
     
     r_frd_roti_cg(:, 1) = [+rx; +ry; -rz];
@@ -187,8 +183,8 @@ function st = firefly_vehicle_st()
         
     st.geometry.r_frd_roti_cg = r_frd_roti_cg;    
         
+    % Create array of rotor DCM        
     % angle2dcm(yaw, pitch, roll) = Rotation matrix of Rotor-i wrt (f, r, d)
-    % Create array of DCMs for all rotors
     R_frdi_frd = zeros(3, 3, st.geometry.nrotors);
     R_frd_frdi = zeros(3, 3, st.geometry.nrotors);
         
@@ -237,8 +233,41 @@ function st = firefly_vehicle_st()
     R_frd_frdi(:, :, 7) = R_frdi_frd(:, :, 7)^(-1);
     
     st.geometry.R_frdi_frd = R_frdi_frd;           % Rotation matrix array
-    st.geometry.R_frd_frdi = R_frd_frdi;           % Rotation matrix array         
+    st.geometry.R_frd_frdi = R_frd_frdi;           % Rotation matrix array   
     
+    % Create array of rotor MOI
+%              x-axis
+%                 |
+%                 |
+%    <========= (z-axis) =========>  --- y-axis
+%                            
+%    cm2m = 1.0 / 100;
+%    g2kg = 1.0 / 1000;    
+%    mass =  110 * g2kg;;
+%    radius = 1.0 * cm2m;
+%    height = 62.0 * cm2m;
+%    height_axis = 2;            % rotors lives along f-r plane             
+%    % MOI wrt local ricm
+%    Jrot1_frd1_r1cm = math_MOI_solid_cylinder(...
+%        mass, radius, height, height_axis);
+%    Jrot1_frd1_r1cm =
+%        0.0035         0         0
+%             0    0.0000         0
+%             0         0    0.0035
+
+    Jrot1_frd1_r1cm = [...
+        [0.003526416666667, 0                ,  0                   ] ; ...
+        [0                , 0.000005500000000,  0                   ] ; ...
+        [0                , 0                ,  0.003526416666667   ]   ...
+    ];
+    
+    % Assume all rotor to have the same MOI
+    Jroti_frdi_ricm = zeros(3, 3, st.geometry.nrotors);
+    for i = 1:st.geometry.nrotors
+        Jroti_frdi_ricm(:, :, i) = Jrot1_frd1_r1cm;
+    end
+        
+    st.geometry.Jroti_frdi_ricm = Jroti_frdi_ricm;
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Controller gains
@@ -261,15 +290,15 @@ function st = firefly_vehicle_st()
     
     % fprintf('Roll rate <==> P \n');    
     % anglAccel / anglVel = rad/s^2 / rad/s = 1 / s
-    st.controller.MC_ROLLRATE_P        = 0.7948; % 2.5
-    st.controller.MC_ROLLRATE_I        = 0.2266; % 0.5    
+    st.controller.MC_ROLLRATE_P        = 1.0000/7; % 2.5
+    st.controller.MC_ROLLRATE_I        = 0.2000/6; % 0.5    
     st.controller.MC_ROLLRATE_D        = 0.0;
     st.controller.MC_ROLLRATE_FF       = 000.000;
         
     % fprintf('Pitch rate <==> Q \n');
     % anglAccel / anglVel = rad/s^2 / rad/s = 1 / s
-    st.controller.MC_PITCHRATE_P       = 2.0;  % 2.8065   
-    st.controller.MC_PITCHRATE_I       = 0.001; %0.5        
+    st.controller.MC_PITCHRATE_P       = 1.0000/7;  % 2.8065   
+    st.controller.MC_PITCHRATE_I       = 0.2000/5; %0.5        
     st.controller.MC_PITCHRATE_D       = 0.0;
     st.controller.MC_PITCHRATE_FF      = 000.000;
 
@@ -282,29 +311,29 @@ function st = firefly_vehicle_st()
     
     % fprintf('Roll angle <==> theta = R \n');
     % angleVel / angle = rad/s / rad = 1 / s
-    st.controller.MC_ROLL_P            = 0.5909; %0.8
+    st.controller.MC_ROLL_P            = 0.500; %0.8
     st.controller.MC_ROLL_TC           = 000.200;
     
     % fprintf('Pitch angle <==> phi = P \n');
     % angleVel / angle = rad/s / rad = 1 / s         
-    st.controller.MC_PITCH_P           = 0.6210;    % 0.5
+    st.controller.MC_PITCH_P           = 0.500;    % 0.5
     st.controller.MC_PITCH_TC          = 000.200;
     
     % fprintf('Yaw angle <==> psi = Y \n');
     % angleVel / angle = rad/s / rad = 1 / s
-    st.controller.MC_YAW_P             = 0.2;
+    st.controller.MC_YAW_P             = 0.8;
     st.controller.MC_YAW_FF            = 000.000; % 000.500
     
     % fprintf('ne velocity (xy) \n');
     % accel / vel = m/s^2 / m/s = 1 / s
-    st.controller.MPC_XY_VEL_P         = 1.10; % 1.00*0.9546/6.0 % = 0.1767 %0.0636*10  
-    st.controller.MPC_XY_VEL_I         = 0.00164;% 0.05*0.9546/6.0 = 0.0079   %0.0014*10
+    st.controller.MPC_XY_VEL_P         = 0.80; % 1.00*0.9546/6.0 % = 0.1767 %0.0636*10  
+    st.controller.MPC_XY_VEL_I         = 0.015;% 0.05*0.9546/6.0 = 0.0079   %0.0014*10
     st.controller.MPC_XY_VEL_D         = 0.0;
     
     % fprintf('d velocity (z) \n');
     % accel / vel = m/s^2 / m/s = 1 / s
-    st.controller.MPC_Z_VEL_P          = 1.00*1.350/2.0; % = 0.6750
-    st.controller.MPC_Z_VEL_I          = 0.10*1.350/1.0; % = 0.0675
+    st.controller.MPC_Z_VEL_P          = 1.0;% 1.00*1.350/2.0; % = 0.6750
+    st.controller.MPC_Z_VEL_I          = 0.15;% 0.10*1.350/1.0; % = 0.0675
     st.controller.MPC_Z_VEL_D          = 0.0;
 
     % fprintf('ne position (xy) \n');
@@ -316,6 +345,67 @@ function st = firefly_vehicle_st()
     % vel / pos = m/s / m = 1/s
     st.controller.MPC_Z_P              = 0.200;
     st.controller.MPC_Z_FF             = 0.500 * 0.0;    
+
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % ESC
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    st.esc.zoh              = 1/100;            % Update frequency, in Hz
+    st.esc.throttle_P       = 650;              % Gain in rad/s  / 1 = rad/s
+    st.esc.angVel_P         = 0.9;              % Gain in V / rad/s
+    st.esc.current_P        = 0.9;              % Gain in A / A = 1
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    % Motor constants
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %    https://www.kdedirect.com/products/kde6213xf-185
+    %        Kv (Motor Velocity Constant) 	185 RPM/V
+    %        Kt (Motor Torque Constant) 	0.0516 Nm/A
+    %        Km (Motor Constant) 	        0.1924 Nm/√(W)
+    %        Maximum Continuous Current* 	62+ A (180 s)
+    %        Maximum Continuous Power* 	    2755+ W (180 s)
+    %        Maximum Efficiency 	        > 93%
+    %        Voltage Range 	                22.2 V (6S LiPo) - 52.2 V (12S LiHV)
+    %        Io (@10V) 	                    0.6 A
+    %        Rm (Wind Resistance) 	        0.072 Ω
+    %        Stator Poles 	                24 (24S28P, HE)
+    %        Magnetic Poles 	            28 (24S28P, HE)
+    %        Bearings 	                    Triple, 698-2RS/608-2RS
+    %        Mount Pattern 	                M4 x ф30 mm, M5/M4 x ф40 mm
+    %        Stator Class 	                6213, 0.2 mm Japanese
+    %        Shaft Diameter 	            ф4 mm (ф8 mm Internal)
+    %        Shaft Length 	                5.5 mm
+    %        Motor Diameter 	            ф70 mm
+    %        Motor Length 	                39 mm
+    %        Motor Weight 	                360 g (415 g with Wires/Bullets)
+    %        Propeller propeller Size 	        Up to 24.5"-TP (24.5"-DP Maximum on 12S)
+    %        Motor Timing 	                22° - 30°
+    %        ESC PWM Rate 	                16 - 32 kHz (600 Hz)
+
+    motor_Kt = 0.0516;
+    motor_Km = 0.1924;
+    motor_Kv = 1 / motor_Kt; % 60 / (2 * pi * x [rpm / V]);
+    motor_R = 0.072 * 2;
+    motor_I0 = 0.6;
+    motor_V = 0.9*(2*4*4.2);
+    motor_Imax = 37.5;    % 300 A for Dragonfly in total (300/8 = 37.5 A)
+    motor_Vmax  = (2*4*4.2);
+    
+    st.motor.motor_Kt   = motor_Kt;             % Kt constant in N m / A
+    st.motor.motor_Km   = motor_Km;             % Km constant in N m / sqrt(W)
+    st.motor.motor_Kv   = motor_Kv;             % Kv constant in rpm / V
+    st.motor.motor_R    = motor_R;              % Widing resistance in ohm
+    st.motor.motor_I0   = motor_I0;             % Idle current in A
+    st.motor.motor_Vmax = motor_Vmax;           % Voltage in V
+    st.motor.motor_Imax = motor_Imax;           % Max current in A
+    st.motor.constants  = [...
+        st.motor.motor_Km   , ...
+        st.motor.motor_Kv   , ...
+        st.motor.motor_Kt   , ...
+        st.motor.motor_R    , ...
+        st.motor.motor_I0   , ...
+        st.motor.motor_Vmax , ...
+        st.motor.motor_Imax   ...        
+        ];          
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Initial condition
@@ -324,9 +414,9 @@ function st = firefly_vehicle_st()
     % Position of the cm wrt ned expressed in ned coord
     r_ned_CM_ned = [0; 0; 0];           % 3 x 1
     % Quaternion for R_frd_ned rotation ( Euler Angles Phi = [phi; thta; psi] )
-    yaw0    = deg2rad(0);  
-    pitch0  = deg2rad(0); 
-    roll0   = deg2rad(0);
+    yaw0    = deg2rad(1*10);  
+    pitch0  = deg2rad(1*20); 
+    roll0   = deg2rad(1*30);
     q0      = angle2quat(yaw0, pitch0, roll0);
     q_frd_ned = transpose(q0);          % 4 x 1
     % Linear Velocity of the CM (frd origin) wrt ned, expressed in ned coord
@@ -336,26 +426,19 @@ function st = firefly_vehicle_st()
     % Initial condition
     st.x0 = [r_ned_CM_ned; q_frd_ned; v_ned_CM_ned; w_frd_frd_ned];  
     
-%    % AngVel of rotor ricm wrt frd, expressed in frdi coord (local body coord)
-%    % w_frdi_roti_frd = zeros(24, 1);     % 24 x 1
-%    omega = ones(8, 1);                % 8 x 1
-%    omega(1) = +1;% -1;
-%    omega(2) = +1;
-%    omega(3) = +1;% -1;
-%    omega(4) = +1;
-%    omega(5) = +1;% -1;
-%    omega(6) = +1;
-%    omega(7) = +1;% -1;
-%    omega(8) = +1;
-%    
-%    omega0 = 0;
-%    % omega0 = 278;
-%    % omega0 = 56;
-%    wrel = omega * omega0;
-%    st.motors_x0 = [wrel];
-%    
-%    % omegadot = ones(8, 1);             % 8 x 1
-%    % st.motors_x0 = [wrel; wreldot];  
+    % AngVel of rotor ricm wrt frd, expressed in frdi coord (local body coord)
+    % w_frdi_roti_frd = zeros(24, 1);     % 24 x 1
+    omega = ones(st.geometry.nrotors, 1);              % 8 x 1
+    % omega0 = 0;
+    % omega0 = 278;
+    omega0 = 56;
+    for roti = 1:st.geometry.nrotors
+        omega(roti) = firefly_rotor_spin_direction(roti) * omega0;
+    end
+    st.omega0 = omega;
+    
+    % omegadot = ones(8, 1);             % 8 x 1
+    % st.motors_x0 = [wrel; wreldot];  
     
 end
 

@@ -1,4 +1,8 @@
 function output_st = postprocess_output(y_arr)
+
+    fprintf('[postprocess_output] y_arr \n');
+    disp(y_arr);
+    output_st = y_arr;
             
 %    % y_arr = transpose(y_arr);
 %    fprintf('[postprocess_output] size(y_arr) \n');
@@ -9,7 +13,6 @@ function output_st = postprocess_output(y_arr)
 %    output_st.nsamples = y_arr_size(2);
     
     % output_st = postprocess_add_arr_to_st(y_arr, output_st);
-    output_st = y_arr;
         
 %    disp('sample 1')
 %    y_arr(1).Vrel_bcm

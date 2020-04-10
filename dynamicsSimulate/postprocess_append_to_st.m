@@ -10,6 +10,10 @@ function out_st = postprocess_append_to_st(in_st, ref_st)
     
     for i = 1:nkey
         in_key = string( key_arr(i) );
+        % in_key = cellstr(in_key)  % matlab2017
+        in_key = char(in_key);      % matlab2017
+        % class(in_st)
+        % class(in_key)
         in_val = getfield(in_st, in_key);
 
         ref_key = in_key;

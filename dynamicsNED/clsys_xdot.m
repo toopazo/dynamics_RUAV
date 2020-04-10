@@ -1,8 +1,8 @@
 function ...
     [...
-        xdotcl      , ... % state derivative of the closed loop system
+        xcldot      , ... % state derivative of the closed loop system
         ycl           ... % output of the closed loop system
-    ] = fdyn_cl_xdot(...
+    ] = clsys_xdot(...
         t           , ... % time
         xcl         , ... % state of the closed loop system
         ucl         , ... % input of the closed loop system
@@ -10,13 +10,16 @@ function ...
         medium_st     ... % medium parameters
     )    
         
+    [xcldot, ycl] = rotors_omegadot_test(t, xcl, ucl, vehicle_st, medium_st);
+    return
+        
     % Closed loop dynamics
     %   xdot  = dynamics(x, u)
     %   u     = actuator(x, delta)
     %   delta = controller(x, xcmd)
     % Therefore
-    %   xdotcl = dyncl(xcl, ucl)
-    %   xdotcl = xdot and thus xcl = x
+    %   xcldot = dyncl(xcl, ucl)
+    %   xcldot = xdot and thus xcl = x
     %   ucl    = xcmd
     x       = xcl;
     xcmd    = ucl;
@@ -46,12 +49,19 @@ function ...
     % Another alternative is an approximated 2nd order transfer function        
     % But for now, let us just assume a perfect actuator
     % Here, a cmd_throttle of 1.0 is translated into a 1000 RPM
-    omega = delta * 1000;    
+    omega = delta * 1500;    
     delta = omega;
-    
-    % The vehicle state derivative xdot is not used by 'firefly_ForMom_net'
-    % So any argument will do
-    xdot = 0;   
+    % TODO See toopazo_dynamics_RUAV.pdf to know what Mrot is
+    % For a rotor with no tilt wrt the vehicle 
+%    Mrot = [...
+%        +Q * Irot_z * sum{ omegai } ; ...
+%        -P * Irot_z * sum{ omegai } ; ...
+%        Irot_z * sum{ omegaidot }     ...
+%    ]
+%    and 
+%    Irot_z*sum{ omegaidot } = ...
+%       sum{Qmotori} + sum{Qi} - N*Rdot - N*(Irot_y - Irot_x )*P*Q
+    Mrot_frd_bcm = [0; 0; 0];     
         
     [...
         Fnet_frd_bcm    , ...   % Fnet = Faero + Fgravity + Frotor
@@ -59,24 +69,20 @@ function ...
         yForMom           ...   % ForMom Additional output
     ] = firefly_ForMom_net(...
         x           , ...   % vehicle state
-        xdot        , ...   % vehicle state derivative
         delta       , ...   % actuator input
         vehicle_st  , ...   % vehicle parameters
         medium_st     ...   % medium parameters
     );    
-    
-    % Here we are assuming no gyroscopic effects
-    Mrot_frd_bcm = [0; 0; 0];
-    
+     
     u = [Fnet_frd_bcm; Mnet_frd_bcm; Mrot_frd_bcm];
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % State dynamics
+    % Vehicle dynamics
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%  
     [... 
         xdot        , ... % vehicle state derivative
         y             ... % vehicle output
-    ] = fdyn_xdot(...
+    ] = vehicle_xdot(...
         t           , ... % time
         x           , ... % vehicle state
         u           , ... % vehicle input
@@ -84,7 +90,7 @@ function ...
         medium_st     ... % medium parameters
     );
         
-    xdotcl = xdot;
+    xcldot = xdot;
     
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Output vector
@@ -93,5 +99,15 @@ function ...
     ycl.yForMom = yForMom;
     ycl.y       = y;
 
+    % t
+    % w = x(11)
+    % wcl = xcl(11)
+    % wdot = xdot(11)
+    % wdotcl = xcldot(11)
+%    u(4:6)
+%    Mnet_frd_bcm
+%    w = x(11:13)
+%    wdot = xdot(11:13)
+%    y.wdot
+    % xcldot(11:13) = [1; 0; 0];
 end
-

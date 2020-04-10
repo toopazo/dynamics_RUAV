@@ -11,7 +11,7 @@ function state_st = postprocess_state(x_arr)
     fprintf('[postprocess_state] size(pos_arr) \n');
     disp(size(pos_arr));
 
-    q_frd_ned_arr = postprocess_state_get_arr(x_arr, 'quat'); % pos_arr.data;
+    q_frd_ned_arr = postprocess_state_get_arr(x_arr, 'quat'); % q_frd_ned_arr.data;
     fprintf('[postprocess_state] size(q_frd_ned_arr) \n');
     disp(size(q_frd_ned_arr));
 
@@ -23,19 +23,20 @@ function state_st = postprocess_state(x_arr)
     fprintf('[postprocess_state] size(RPY_arr) \n');
     disp(size(RPY_arr));
 
-    PQR_arr = postprocess_state_get_arr(x_arr, 'angvel'); % PQR_arr.data;
+    PQR_arr = postprocess_state_get_arr(x_arr, 'pqr'); % PQR_arr.data;
     fprintf('[postprocess_state] size(PQR_arr) \n');
     disp(size(PQR_arr));
     
-%    wrel_arr = postprocess_state_get_arr(x_arr, 'wrel'); % PQR_arr.data;
-%    fprintf('size(wrel_arr) \n');
-%    disp(size(wrel_arr));    
+    omega_arr = postprocess_state_get_arr(x_arr, 'omega'); % PQR_arr.data;
+    fprintf('size(wrel_arr) \n');
+    disp(size(omega_arr));    
     
-    state_st.pos_arr = pos_arr;
-    state_st.vel_arr = vel_arr;
-    state_st.q_frd_ned_arr = q_frd_ned_arr;
-    state_st.RPY_arr = RPY_arr;
-    state_st.PQR_arr = PQR_arr;
-%    state_st.wrel_arr = wrel_arr;
+    state_st.pos_arr        = pos_arr;
+    state_st.q_frd_ned_arr  = q_frd_ned_arr;
+    state_st.vel_arr        = vel_arr;    
+    state_st.RPY_arr        = RPY_arr;
+    state_st.PQR_arr        = PQR_arr;
+    state_st.omega_arr      = omega_arr;
+
 end
 

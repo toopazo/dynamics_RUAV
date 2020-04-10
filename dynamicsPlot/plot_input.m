@@ -72,9 +72,9 @@ function fig = plot_input(sim_st)
         subplot(3, 1, 3)
         hold on;
         grid on;                
-        plot(time_arr, Mrot_arr(1,:), '--r', 'LineWidth', 2);
-        plot(time_arr, Mrot_arr(2,:), '--g', 'LineWidth', 2);
-        plot(time_arr, Mrot_arr(3,:), '--b', 'LineWidth', 2);        
+        plot(time_arr, Mrot_arr(1,:), '-r', 'LineWidth', 2);
+        plot(time_arr, Mrot_arr(2,:), '-g', 'LineWidth', 2);
+        plot(time_arr, Mrot_arr(3,:), '-b', 'LineWidth', 2);        
         title('Rotor moment acting on the vehicle (Mrot)');
         xlabel('Time s');
         ylabel('Moment Nm');

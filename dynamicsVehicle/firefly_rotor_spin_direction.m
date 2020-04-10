@@ -1,4 +1,4 @@
-function signi = firefly_rotors_spin_direction(roti)
+function signi = firefly_rotor_spin_direction(roti)
 
     % Spinning and location of rotors (according to px4 naming)
     % up R2 cw  / down R5 ccw            up R1 ccw / down R6 cw

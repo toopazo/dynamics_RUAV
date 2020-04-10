@@ -5,11 +5,12 @@ function [fig1, fig2, fig3, fig4] = plot_state(sim_st)
     time_arr = sim_st.time_arr;
     
     % Unpack state
-    pos_arr = sim_st.state_st.pos_arr;
-    vel_arr = sim_st.state_st.vel_arr;
-    q_frd_ned_arr = sim_st.state_st.q_frd_ned_arr;
-    RPY_arr = sim_st.state_st.RPY_arr;
-    PQR_arr = sim_st.state_st.PQR_arr;
+    pos_arr         = sim_st.state_st.pos_arr;
+    vel_arr         = sim_st.state_st.vel_arr;
+    q_frd_ned_arr   = sim_st.state_st.q_frd_ned_arr;
+    RPY_arr         = sim_st.state_st.RPY_arr;
+    PQR_arr         = sim_st.state_st.PQR_arr;
+    omega_arr       = sim_st.state_st.omega_arr;
     
     if isfield(sim_st, 'cmd_st')
         cmd_pos_arr = sim_st.cmd_st.cmd_pos_arr;
@@ -40,6 +41,14 @@ function [fig1, fig2, fig3, fig4] = plot_state(sim_st)
     fprintf('[plot_state] filename2 %s \n', filename2);
     print(fig2, [filename2 '.jpeg'], '-djpeg');
     savefig(fig2, filename2);  
+    
+    fig3 = plot_omega_arr(time_arr, omega_arr);
+
+    set(fig3, 'Position', get(0, 'Screensize'));
+    filename3 = [fpath 'plot_state3'];
+    fprintf('[plot_state] filename3 %s \n', filename3);
+    print(fig3, [filename3 '.jpeg'], '-djpeg');
+    savefig(fig3, filename3);      
     
     fig3 = 0;
 %    dtime = time_arr(2) - time_arr(1);

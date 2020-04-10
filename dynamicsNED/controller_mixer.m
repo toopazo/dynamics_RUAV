@@ -18,17 +18,13 @@ function [cmd_throttle] = controller_mixer(...
     
     % Yaw rotation can be archive by:
     % 
-    % 1) Torque: If the Thrust vector (due to abc rotation wrt frd frame)
-    % has an f-r component, then we can archive yaw rotation as in 
-    % the case of pitch and roll. 
+    % 1) Torque: If the Thrust vector has an f-r component, 
+    % then we can archive yaw rotation as in the case of pitch and roll. 
     % 
-    % 2) Reaction-torque: Yaw rotation can be archive by the reaction to a
-    % a rotor (propeller or reaction-wheel).
-    % Due to the conservation of angular moment (action/reaction) 
-    % the stator (or body of the motor) rotates in the 
-    % opposite direction of the rotor (propeller or reaction-wheel).
-    % This is used in coaxial rotors
-        
+    % 2) Reaction-torque: Yaw rotation can also be archived by the aerodynamic
+    % torque produced by rotors (drag). This is an external torque whose net
+    % effect is applied to the CM of the vehicle
+            
     cmd_throttle = [0; 0; 0; 0; 0; 0; 0; 0];
     
     % From build/nuttx_px4fmu-v4_default/src/lib/mixer/mixer_multirotor_normalized.generated.h
@@ -43,30 +39,15 @@ function [cmd_throttle] = controller_mixer(...
 %	    {  0.707107, -0.707107, -1.000000,  1.000000 },
 %    };
     
-%    % Pure reaction wheel effects (e.g firefly_straight)
-%    % rotors number 1 2 3 4 5 6 7 8 
-%    % Y rate sign   + - + - + - + - 
-%    config_octa_cox = [...
-%        ...% R rate,    P rate,    Y rate,     accel_d
-%        [ -0.707107,  0.707107, +1.000000,  -1.000000 ]; ...     % rotor1
-%        [  0.707107,  0.707107, -1.000000,  -1.000000 ]; ...     % rotor2
-%        [  0.707107, -0.707107, +1.000000,  -1.000000 ]; ...     % rotor3
-%        [ -0.707107, -0.707107, -1.000000,  -1.000000 ]; ...     % rotor4
-%        [  0.707107,  0.707107, +1.000000,  -1.000000 ]; ...     % rotor5
-%        [ -0.707107,  0.707107, -1.000000,  -1.000000 ]; ...     % rotor6
-%        [ -0.707107, -0.707107, +1.000000,  -1.000000 ]; ...     % rotor7
-%        [  0.707107, -0.707107, -1.000000,  -1.000000 ]; ...     % rotor8
-%    ];
-    
     % Inwards canted rotors effects (e.g firefly and dragonfly)
     % rotors number 1 2 3 4 5 6 7 8 
     % Y rate sign   - + - + + - + -     
     config_octa_cox = [...
         ...% R rate,    P rate,    Y rate,     accel_d
-        [ -0.707107,  0.707107, -1.000000,  -1.000000 ]; ...     % rotor1
-        [  0.707107,  0.707107,  1.000000,  -1.000000 ]; ...     % rotor2
-        [  0.707107, -0.707107, -1.000000,  -1.000000 ]; ...     % rotor3
-        [ -0.707107, -0.707107,  1.000000,  -1.000000 ]; ...     % rotor4
+        [ -0.707107,  0.707107,  1.000000,  -1.000000 ]; ...     % rotor1
+        [  0.707107,  0.707107, -1.000000,  -1.000000 ]; ...     % rotor2
+        [  0.707107, -0.707107,  1.000000,  -1.000000 ]; ...     % rotor3
+        [ -0.707107, -0.707107, -1.000000,  -1.000000 ]; ...     % rotor4
         [  0.707107,  0.707107,  1.000000,  -1.000000 ]; ...     % rotor5
         [ -0.707107,  0.707107, -1.000000,  -1.000000 ]; ...     % rotor6
         [ -0.707107, -0.707107,  1.000000,  -1.000000 ]; ...     % rotor7
@@ -74,7 +55,6 @@ function [cmd_throttle] = controller_mixer(...
     ];
         
     num_rotors = 8;
-    % num_rotors = size(cmd_throttle, 1);
     mixer_output = zeros(num_rotors, 1);
     m_rotors = config_octa_cox;
     roll_column      = 1;
